@@ -1,9 +1,11 @@
+from re import search
 import cv2
 import numpy as np
 import streamlit as st
 from streamlit_extras.let_it_rain import rain
 import math
 import time
+import pickle
 
 
 def contours_from_image(image):
@@ -96,7 +98,7 @@ def reset():
 
 
 #search_color = np.array([66, 99, 226])  # this is BGR (stupid cv2)
-search_color = np.array([41, 61, 62])
+#search_color = np.array([41, 61, 62])
 num_starting_iters = 5
 smoothing_kernel = (5, 5)
 distance_threshold = 0.1
@@ -107,11 +109,16 @@ distance_threshold = 0.1
 scan_started = False
 start_time = time.time()
 
-search_color = search_color * np.array([0.5, 2.55, 2.55])
-color_threshold = np.array([5, 50, 50])
+#search_color = search_color * np.array([0.5, 2.55, 2.55])
+#color_threshold = np.array([5, 50, 50])
 
-bottom_thresh = search_color - color_threshold
-top_thresh = search_color + color_threshold
+with open('saved_data.pickle', 'rb') as f:
+    search_color, (bh, bs, bv), (th, ts, tv) = pickle.load(f)
+
+bot_color_thresh = np.array([bh, bs, bv])
+top_color_thresh = np.array([th, ts, tv])
+bottom_thresh = search_color - bot_color_thresh
+top_thresh = search_color + top_color_thresh
 bottom_thresh = np.clip(bottom_thresh, a_min=0, a_max=None)
 top_thresh = np.clip(top_thresh, a_min=None, a_max=255)
 top_thresh[0] = min(179, top_thresh[0])
